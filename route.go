@@ -1,11 +1,7 @@
 package routing
 
-import (
-	"github.com/valyala/fasthttp"
-)
-
 type (
-	Handler func(ctx *fasthttp.RequestCtx)
+	Handler func(ctx *Context)
 	Route   struct {
 		handler *Handler
 	}
