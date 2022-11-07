@@ -28,6 +28,6 @@ func (c *Context) setPathParam(pathParamName *PathParamName) {
 	}
 }
 
-func (c *Context) getPathParamValue(paramName string) string {
+func (c *Context) GetPathParamValue(paramName string) string {
 	return c.pathParam[paramName]
 }
