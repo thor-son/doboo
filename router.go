@@ -52,7 +52,7 @@ func (r *Router) find(method string, path string, ctx *Context) {
 			} else {
 				matchRoute = prevMatchRoute.childRoutes["*"]
 			}
-			// TODO : param set to ctx
+			ctx.setPathParamValue(subPath, depth)
 		}
 		if matchRoute == nil {
 			r.notFoundHanlder(ctx)
@@ -65,6 +65,9 @@ func (r *Router) find(method string, path string, ctx *Context) {
 		return
 	}
 	handler := *matchRoute.handler
+	if len(ctx.pathParamValue) > 0 {
+		ctx.setPathParam(matchRoute.pathParamName)
+	}
 	handler(ctx)
 }
 
@@ -77,14 +80,15 @@ func (r *Router) AddRoute(method string, path string, handler Handler) {
 	}
 	pathSlice := strings.Split(path, "/")[1:]
 	var route *Route
+	pathParamName := newPathParamName()
 	for depth, subPath := range pathSlice {
 		matched, err := regexp.Match("<.+>", []byte(subPath))
 		if err != nil {
 			continue
 		}
 		if matched {
+			pathParamName.parsePathParamName(subPath, depth)
 			subPath = "*"
-			// TODO : param name set to ctx
 		}
 		if depth == 0 {
 			if r.routes[method][subPath] == nil {
@@ -97,6 +101,9 @@ func (r *Router) AddRoute(method string, path string, handler Handler) {
 		route = route.childRoutes[subPath]
 	}
 	route.setHandler(handler)
+	if len(pathParamName.paramName) > 0 {
+		route.setParamName(pathParamName)
+	}
 }
 
 func (r *Router) SetNotFoundHandler(handler Handler) {
