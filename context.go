@@ -27,3 +27,7 @@ func (c *Context) setPathParam(pathParamName *PathParamName) {
 		c.pathParam[pathParamName.paramName[depth]] = value
 	}
 }
+
+func (c *Context) getPathParamValue(paramName string) string {
+	return c.pathParam[paramName]
+}
