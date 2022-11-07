@@ -21,8 +21,8 @@ func main() {
 	})
 
 	router.AddRoute("GET", "/do/<id>/<action>", func(c *doboo.Context) {
-		fmt.Fprintf(c, "id : %s\n", c.getPathParamValue("id"))
-		fmt.Fprintf(c, "action : %s\n", c.getPathParamValue("action"))
+		fmt.Fprintf(c, "id : %s\n", c.GetPathParamValue("id"))
+		fmt.Fprintf(c, "action : %s\n", c.GetPathParamValue("action"))
 	})
 
 	router.SetNotFoundHandler(func(c *doboo.Context) {
