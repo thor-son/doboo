@@ -13,9 +13,9 @@ import (
 
 func main() {
 
-  router := New()
+	router := New()
 
-  router.AddRoute("GET", "/", func(c *Context) {
+  	router.AddRoute("GET", "/", func(c *Context) {
 		fmt.Fprintf(c, "index page")
 	})
 
@@ -24,10 +24,10 @@ func main() {
 		fmt.Fprintf(c, "action : %s\n", c.pathParam["action"])
 	})
 
-  router.SetNotFoundHandler(func(c *Context) {
+	router.SetNotFoundHandler(func(c *Context) {
 		fmt.Fprintf(c, "not found handler.")
 	})
 
-  fasthttp.ListenAndServe(":8081", router.HandleRequest)
+  	fasthttp.ListenAndServe(":8081", router.HandleRequest)
 }
 ```
