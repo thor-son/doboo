@@ -2,6 +2,8 @@ package routing
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
 	"sync"
 
 	"github.com/valyala/fasthttp"
@@ -9,7 +11,7 @@ import (
 
 type Router struct {
 	pool            sync.Pool
-	routes          map[string]map[string]Route
+	routes          map[string]map[string]*Route
 	notFoundHanlder Handler
 }
 
@@ -35,8 +37,30 @@ func (r *Router) find(method string, path string, ctx *Context) {
 		r.notFoundHanlder(ctx)
 		return
 	}
-	matchRoute := routes[path]
-	if matchRoute.handler == nil {
+	var prevMatchRoute *Route
+	var matchRoute *Route
+	pathSlice := strings.Split(path, "/")[1:]
+	for depth, subPath := range pathSlice {
+		if depth == 0 {
+			matchRoute = routes[subPath]
+		} else {
+			matchRoute = prevMatchRoute.childRoutes[subPath]
+		}
+		if matchRoute == nil {
+			if depth == 0 {
+				matchRoute = routes["*"]
+			} else {
+				matchRoute = prevMatchRoute.childRoutes["*"]
+			}
+			// TODO : param set to ctx
+		}
+		if matchRoute == nil {
+			r.notFoundHanlder(ctx)
+			return
+		}
+		prevMatchRoute = matchRoute
+	}
+	if matchRoute == nil || matchRoute.handler == nil {
 		r.notFoundHanlder(ctx)
 		return
 	}
@@ -46,12 +70,33 @@ func (r *Router) find(method string, path string, ctx *Context) {
 
 func (r *Router) AddRoute(method string, path string, handler Handler) {
 	if r.routes == nil {
-		r.routes = make(map[string]map[string]Route)
+		r.routes = make(map[string]map[string]*Route)
 	}
 	if r.routes[method] == nil {
-		r.routes[method] = make(map[string]Route)
+		r.routes[method] = make(map[string]*Route)
 	}
-	r.routes[method][path] = *newRoute(&handler)
+	pathSlice := strings.Split(path, "/")[1:]
+	var route *Route
+	for depth, subPath := range pathSlice {
+		matched, err := regexp.Match("<.+>", []byte(subPath))
+		if err != nil {
+			continue
+		}
+		if matched {
+			subPath = "*"
+			// TODO : param name set to ctx
+		}
+		if depth == 0 {
+			if r.routes[method][subPath] == nil {
+				r.routes[method][subPath] = newRoute(nil)
+			}
+			route = r.routes[method][subPath]
+			continue
+		}
+		route.addChild(subPath, newRoute(nil))
+		route = route.childRoutes[subPath]
+	}
+	route.setHandler(handler)
 }
 
 func (r *Router) SetNotFoundHandler(handler Handler) {
