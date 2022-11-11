@@ -31,3 +31,8 @@ func (c *Context) setPathParam(pathParamName *PathParamName) {
 func (c *Context) GetPathParamValue(paramName string) string {
 	return c.pathParam[paramName]
 }
+
+func (c *Context) SendString(body string) error {
+	c.Response.SetBodyString(body)
+	return nil
+}
