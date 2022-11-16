@@ -36,3 +36,7 @@ func (c *Context) SendString(body string) error {
 	c.Response.SetBodyString(body)
 	return nil
 }
+
+func (c *Context) getQueryString() string {
+	return string(c.URI().QueryString())
+}
