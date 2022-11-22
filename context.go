@@ -40,3 +40,7 @@ func (c *Context) SendString(body string) error {
 func (c *Context) getQueryString() string {
 	return string(c.URI().QueryString())
 }
+
+func (c *Context) addHeader(key, value string) {
+	c.Response.Header.Set(key, value)
+}
