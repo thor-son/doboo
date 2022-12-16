@@ -44,3 +44,7 @@ func (c *Context) getQueryString() string {
 func (c *Context) addHeader(key, value string) {
 	c.Response.Header.Set(key, value)
 }
+
+func (c *Context) getBody() string {
+	return string(c.Request.Body())
+}
